@@ -226,6 +226,16 @@ display_on_board(grid);
 document.addEventListener("keydown", function (event) {
 	let ok = false;
 
+	let origin_grid = []
+
+	for(let i = 0; i < sidelen; i++){
+		let temp = []
+		for(let j = 0; j < sidelen; j++){
+			temp.push(grid[i][j])
+		}
+		origin_grid.push(temp)
+	}
+
 	switch (event.key) {
 		case 'ArrowLeft':
 			push_left(grid);
@@ -259,12 +269,20 @@ document.addEventListener("keydown", function (event) {
 		display_on_board(grid);
 		return;
 	}
-	spawn_random(grid);
-	display_on_board(grid);
 
+	let check_is_grid_changed = false
+
+	for(let i = 0; i < sidelen; i++){
+		for(let j = 0; j < sidelen; j++){
+			if (grid[i][j]!= origin_grid[i][j]){
+        check_is_grid_changed = true;
+        break;
+      }
+		}
+	}
+
+	if(check_is_grid_changed){
+		spawn_random(grid);
+		display_on_board(grid);
+	}
 });
-
-
-
-
-
