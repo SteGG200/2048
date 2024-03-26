@@ -46,3 +46,7 @@ footer{
 	font-size: 40px;
 	font-weight: bold;
 }
+
+.tile-none{
+	transition: background-color 0.5s
+}

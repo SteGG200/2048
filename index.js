@@ -26,12 +26,12 @@ map_color = {
 
 let continue_game = false;
 
-const scenario = [
-	[8, 2, 16, 8],	
-	[2, 16, 4, 0],
-	[16, 8, 0, 2],
-	[4, 2, 4, 0]
-];
+// const scenario = [
+// 	[8, 2, 16, 8],	
+// 	[2, 16, 4, 0],
+// 	[16, 8, 0, 2],
+// 	[4, 2, 4, 0]
+// ];
 
 const sidelen = 4;
 
@@ -49,20 +49,36 @@ function spawn_random(m_grid) {
 	let random_number = Math.floor(Math.random() * 10);
 	let random_idx = vacant_tiles[Math.floor(Math.random() * vacant_tiles.length)];
 	m_grid[random_idx[0]][random_idx[1]] = (random_number == 0) * 2 + 2;
+	let tile = document.getElementById(`tile-${random_idx[0] + 1}-${random_idx[1] + 1}`);
+	if (!tile.classList.contains("tile-none")) tile.classList.add("tile-none");
+	console.log(tile)
 }
 
 function display_on_board(m_grid) {
 	for (let i = 0; i < sidelen; i++) {
 		for (let j = 0; j < sidelen; j++) {
+			let tile = document.getElementById("tile-" + (i + 1) + "-" + (j + 1))
 			if (m_grid[i][j]) {
-				document.getElementById("tile-" + (i + 1) + "-" + (j + 1)).innerHTML = grid[i][j];
-				document.getElementById("tile-" + (i + 1) + "-" + (j + 1)).style.backgroundColor = map_color[grid[i][j]];
+				tile.innerHTML = grid[i][j];
+				tile.style.backgroundColor = map_color[grid[i][j]];
 			} else {
-				document.getElementById("tile-" + (i + 1) + "-" + (j + 1)).innerHTML = "";
-				document.getElementById("tile-" + (i + 1) + "-" + (j + 1)).style.backgroundColor = "yellow";
+				tile.innerHTML = "";
+				tile.style.backgroundColor = "yellow";
 			}
 		}
 	}
+}
+
+function make_a_copy_grid(m_grid) {
+	let result = [];
+	for (let i = 0; i < sidelen; i++) {
+		let temp = []
+		for (let j = 0; j < sidelen; j++) {
+			temp.push(m_grid[i][j])
+		}
+		result.push(temp)
+	}
+	return result;
 }
 
 // left
@@ -154,7 +170,7 @@ function push_down(m_grid) {
 			if (m_grid[i][j] != 0) col.push(m_grid[i][j]);
 			m_grid[i][j] = 0;
 		}
-		for (let i = sidelen - 1; i >= sidelen- col.length; i--) {
+		for (let i = sidelen - 1; i >= sidelen - col.length; i--) {
 			m_grid[i][j] = col[sidelen - 1 - i];
 		}
 	}
@@ -172,9 +188,9 @@ function combine_down(m_grid) {
 }
 
 
-function reset_board(m_grid){
-	for (let i = 0; i < sidelen; i++){
-		for (let j = 0; j < sidelen; j++){
+function reset_board(m_grid) {
+	for (let i = 0; i < sidelen; i++) {
+		for (let j = 0; j < sidelen; j++) {
 			m_grid[i][j] = 0;
 		}
 	}
@@ -182,11 +198,11 @@ function reset_board(m_grid){
 	spawn_random(m_grid);
 }
 
-function check_win(m_grid){
+function check_win(m_grid) {
 	let has_2048 = false;
 	let can_play = false;
-	for (let i = 0; i < sidelen; i++){
-		for (let j = 0; j < sidelen; j++){
+	for (let i = 0; i < sidelen; i++) {
+		for (let j = 0; j < sidelen; j++) {
 			if (m_grid[i][j] == 2048) has_2048 = true;
 			if (m_grid[i][j] == 0) can_play = true;
 			if (i > 0 && m_grid[i][j] == m_grid[i - 1][j]) can_play = true;
@@ -196,23 +212,23 @@ function check_win(m_grid){
 
 		}
 	}
-	if (has_2048 && !can_play){
-		if (confirm("YOU WON! But there are no moves left! Click OK to restart") == true){
+	if (has_2048 && !can_play) {
+		if (confirm("YOU WON! But there are no moves left! Click OK to restart") == true) {
 			reset_board(m_grid);
 			continue_game = false;
 		}
 		return true;
-	}else if (has_2048 && !continue_game){
-		if (confirm("YOU WON! Click OK to restart, Click cancel to continue") == true){
+	} else if (has_2048 && !continue_game) {
+		if (confirm("YOU WON! Click OK to restart, Click cancel to continue") == true) {
 			reset_board(m_grid);
-		}else{
+		} else {
 			continue_game = true;
 		}
 		return true;
-	}else if (!can_play){
-		if (confirm("GAME OVER! Click OK to restart") == true){
+	} else if (!can_play) {
+		if (confirm("GAME OVER! Click OK to restart") == true) {
 			reset_board(m_grid);
-			continue_game= false;
+			continue_game = false;
 		}
 		return true;
 	}
@@ -224,17 +240,18 @@ spawn_random(grid);
 //grid = scenario;
 display_on_board(grid);
 document.addEventListener("keydown", function (event) {
+	// reset transition class
+	for (let i = 0; i < sidelen; i++) {
+		for (let j = 0; j < sidelen; j++) {
+			let tile = document.getElementById(`tile-${i + 1}-${j + 1}`)
+			if (tile.classList.contains("tile-none")) tile.classList.remove("tile-none")
+		}
+	}
+	//
+
 	let ok = false;
 
-	let origin_grid = []
-
-	for(let i = 0; i < sidelen; i++){
-		let temp = []
-		for(let j = 0; j < sidelen; j++){
-			temp.push(grid[i][j])
-		}
-		origin_grid.push(temp)
-	}
+	let origin_grid = make_a_copy_grid(grid);
 
 	switch (event.key) {
 		case 'ArrowLeft':
@@ -265,23 +282,23 @@ document.addEventListener("keydown", function (event) {
 	// event.preventDefault();
 	if (!ok) return;
 
-	if (check_win(grid)){
+	if (check_win(grid)) {
 		display_on_board(grid);
 		return;
 	}
 
 	let check_is_grid_changed = false
 
-	for(let i = 0; i < sidelen; i++){
-		for(let j = 0; j < sidelen; j++){
-			if (grid[i][j]!= origin_grid[i][j]){
-        check_is_grid_changed = true;
-        break;
-      }
+	for (let i = 0; i < sidelen; i++) {
+		for (let j = 0; j < sidelen; j++) {
+			if (grid[i][j] != origin_grid[i][j]) {
+				check_is_grid_changed = true;
+				break;
+			}
 		}
 	}
 
-	if(check_is_grid_changed){
+	if (check_is_grid_changed) {
 		spawn_random(grid);
 		display_on_board(grid);
 	}
